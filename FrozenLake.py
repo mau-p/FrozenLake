@@ -1,25 +1,30 @@
-from xxlimited import new
 import gym
+import agents
 
-from agents import SarsaAgent
-
-EPISODES = 100
-MAX_STEPS = 99
+EPISODES = 1000
+MAX_STEPS = 1000
 
 env = gym.make('FrozenLake8x8-v1')
 env.render()
 
-sarsa_agent = SarsaAgent(env, 0.95, 0.95, 0.1)
+sarsa_agent = agents.SarsaAgent(env, 0.95, 0.95, 0.1)
+q_agent = agents.QAgent(env, 0.95, 0.95, 0.1)
+goal_count = 0
 
 for episode in range(EPISODES):
     state = env.reset()
     step = 0
     done = False
     for step in range(MAX_STEPS):
-        action = sarsa_agent.choose_egreedy(state)
+        action = q_agent.choose_egreedy(state)
         new_state, reward, done, info = env.step(action)
-        next_action = sarsa_agent.choose_egreedy(new_state)
-        sarsa_agent.update(state, new_state, reward, action, next_action)
+        if reward == 1:
+            goal_count += 1
+        q_agent.update(state, action, reward, new_state)
         env.render()
+        state = new_state
         if done:
             break
+    
+print(f'goal count: {goal_count}')
+print(q_agent.Q)
