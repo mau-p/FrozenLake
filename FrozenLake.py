@@ -3,34 +3,33 @@ import agents
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 EPISODES = 100
 MAX_STEPS = 100
 
+
 env = gym.make('FrozenLake-v1')
 env.render()
-
-sarsa_agent = agents.SarsaAgent(env, 0.95, 0.95, 0.1)
-q_agent = agents.QAgent(env, 0.95, 0.95, 0.1)
+greedy_agent = agents.GreedyAgent(env, alpha=0.95, gamma=0.95)
 goal_count = np.zeros(EPISODES)
 count = 0
 agent_succes = np.zeros(EPISODES)
-for training in range(EPISODES):
-    for episode in range(EPISODES):
-        state = env.reset()
-        step = 0
-        done = False
-        for step in range(MAX_STEPS):
-            action = sarsa_agent.choose_egreedy(state)
-            new_state, reward, done, info = env.step(action)
-            if reward == 1:
-                goal_count = goal_count + 1
-                count = count +1
 
-            q_agent.update(state, action, reward, new_state)
-            env.render()
-            state = new_state
-            if done:
-                break
+for episode in range(EPISODES):
+    state = env.reset()
+    step = 0
+    done = False
+    for step in range(MAX_STEPS):
+        action = greedy_agent.choose(state)
+        new_state, reward, done, info = env.step(action)
+        if reward == 1:
+            goal_count += 1
+        greedy_agent.q_update(state, action, reward, new_state)
+        env.render()
+        state = new_state
+        if done:
+            break
+            
     agent_succes[training] = agent_succes[training] + (count - agent_succes[training]) / (training + 1)
 
     goal_count = np.zeros(EPISODES)
@@ -44,4 +43,5 @@ plt.title("Number of successful runs in " + str(EPISODES) + " trainings")
 plt.show()
 #print(q_agent.Q)
 print(agent_succes)
+
 
