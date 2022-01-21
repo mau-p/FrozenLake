@@ -1,47 +1,44 @@
 import gym
 import agents
 import matplotlib.pyplot as plt
-import numpy as np
 
 
-EPISODES = 100
-MAX_STEPS = 100
+EPISODES = 1000
+MAX_STEPS = 20
 
 
-env = gym.make('FrozenLake-v1')
+env = gym.make('FrozenLake-v1', is_slippery = False)
 env.render()
-greedy_agent = agents.GreedyAgent(env, alpha=0.95, gamma=0.95)
-goal_count = np.zeros(EPISODES)
-count = 0
-agent_succes = np.zeros(EPISODES)
+greedy_agent = agents.GreedyAgent(env, alpha=0.95, gamma=0.95, steps=MAX_STEPS, episodes=EPISODES)
 
 for episode in range(EPISODES):
     state = env.reset()
     step = 0
+    reached_goal = False
     done = False
     for step in range(MAX_STEPS):
         action = greedy_agent.choose(state)
         new_state, reward, done, info = env.step(action)
-        if reward == 1:
-            goal_count += 1
-        greedy_agent.q_update(state, action, reward, new_state)
+        next_action = greedy_agent.choose(new_state)
         env.render()
+        greedy_agent.sarsa_update(state, action, reward, new_state, next_action)
         state = new_state
         if done:
-            break
-            
-    agent_succes[training] = agent_succes[training] + (count - agent_succes[training]) / (training + 1)
+            break 
+    greedy_agent.update_stats(reward)
 
-    goal_count = np.zeros(EPISODES)
-    count=0
-
-plt.plot(agent_succes, label="Amount of time it reaches the goal")
+plt.plot(greedy_agent.obtained_rewards, label="Amount of time it reaches the goal")
 plt.legend()
 plt.xlabel("Iterations")
 plt.ylabel("Number of optimal actions in %")
-plt.title("Number of successful runs in " + str(EPISODES) + " trainings")
+plt.title(f'Number of successful runs in {EPISODES} trainings')
 plt.show()
-#print(q_agent.Q)
-print(agent_succes)
+
+plt.plot(greedy_agent.prob_of_success, label="Amount of time it reaches the goal")
+plt.legend()
+plt.xlabel("Iterations")
+plt.ylabel("Probability of the agent reaching the goal")
+plt.title("Probability of the agent reaching the goal throughout training")
+plt.show()
 
 
