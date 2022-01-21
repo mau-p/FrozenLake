@@ -1,30 +1,47 @@
 import gym
 import agents
+import matplotlib.pyplot as plt
+import numpy as np
 
-EPISODES = 1000
-MAX_STEPS = 1000
+EPISODES = 100
+MAX_STEPS = 100
 
-env = gym.make('FrozenLake8x8-v1')
+env = gym.make('FrozenLake-v1')
 env.render()
 
 sarsa_agent = agents.SarsaAgent(env, 0.95, 0.95, 0.1)
 q_agent = agents.QAgent(env, 0.95, 0.95, 0.1)
-goal_count = 0
+goal_count = np.zeros(EPISODES)
+count = 0
+agent_succes = np.zeros(EPISODES)
+for training in range(EPISODES):
+    for episode in range(EPISODES):
+        state = env.reset()
+        step = 0
+        done = False
+        for step in range(MAX_STEPS):
+            action = sarsa_agent.choose_egreedy(state)
+            new_state, reward, done, info = env.step(action)
+            if reward == 1:
+                goal_count = goal_count + 1
+                count = count +1
 
-for episode in range(EPISODES):
-    state = env.reset()
-    step = 0
-    done = False
-    for step in range(MAX_STEPS):
-        action = q_agent.choose_egreedy(state)
-        new_state, reward, done, info = env.step(action)
-        if reward == 1:
-            goal_count += 1
-        q_agent.update(state, action, reward, new_state)
-        env.render()
-        state = new_state
-        if done:
-            break
-    
-print(f'goal count: {goal_count}')
-print(q_agent.Q)
+            q_agent.update(state, action, reward, new_state)
+            env.render()
+            state = new_state
+            if done:
+                break
+    agent_succes[training] = agent_succes[training] + (count - agent_succes[training]) / (training + 1)
+
+    goal_count = np.zeros(EPISODES)
+    count=0
+
+plt.plot(agent_succes, label="Amount of time it reaches the goal")
+plt.legend()
+plt.xlabel("Iterations")
+plt.ylabel("Number of optimal actions in %")
+plt.title("Number of successful runs in " + str(EPISODES) + " trainings")
+plt.show()
+#print(q_agent.Q)
+print(agent_succes)
+
