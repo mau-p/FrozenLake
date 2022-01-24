@@ -4,15 +4,16 @@ import matplotlib.pyplot as plt
 
 
 EPISODES = 1000
-MAX_STEPS = 200
+MAX_STEPS = 30
 
 
 env = gym.make('FrozenLake-v1', is_slippery = False)
 env.render()
-#agent = agents.GreedyAgent(env, alpha=0.95, gamma=0.95, steps=MAX_STEPS, episodes=EPISODES)
-#agent = agents.eGreedyAgent(env, epsilon=0.1, alpha=0.95, gamma=0.95,steps=MAX_STEPS,episodes=EPISODES)
-agent = agents.OptimisticAgent(env, alpha=0.95, gamma=0.95,steps=MAX_STEPS,episodes=EPISODES)
-#agent = agents.UCB(env, alpha=0.95, gamma=0.95,steps=MAX_STEPS,episodes=EPISODES)
+# agent = agents.GreedyAgent(env, alpha=0.95, gamma=0.95, episodes=EPISODES)
+# agent = agents.eGreedyAgent(env, epsilon=0.1, alpha=0.95, gamma=0.95, episodes=EPISODES)
+# agent = agents.OptimisticAgent(env, alpha=0.95, gamma=0.95, episodes=EPISODES)
+agent = agents.UCB(env, alpha=0.95, gamma=0.95, episodes=EPISODES)
+# agent = agents.Softmax(env, alpha=0.95, gamma=0.95, episodes=EPISODES, tau=1)
 
 for episode in range(EPISODES):
     state = env.reset()
@@ -20,9 +21,9 @@ for episode in range(EPISODES):
     reached_goal = False
     done = False
     for step in range(MAX_STEPS):
-        action = agent.choose(state)
+        action = agent.choose(state, True)
         new_state, reward, done, info = env.step(action)
-        next_action = agent.choose(new_state)
+        next_action = agent.choose(new_state, False)
         env.render()
         agent.sarsa_update(state, action, reward, new_state, next_action)
         #agent.q_update(state, action, reward, new_state)
