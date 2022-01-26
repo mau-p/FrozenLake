@@ -73,6 +73,8 @@ class UCB(Agent):
         for action in range(len(self.Q[state, :])):
             action_counter = self.action_count[action] + 1
             uncertainty = self.c * np.sqrt(np.log(self.t) / action_counter)
+            print(f'action counter {action_counter}')
+            print(f'uncertainty {uncertainty}')
             if uncertainty + self.Q[state, action] > max_combined:
                 max_combined = uncertainty + self.Q[state, action]
                 max_combined_action = action
@@ -81,7 +83,6 @@ class UCB(Agent):
             self.action_count[max_combined_action] += 1
         return max_combined_action
 
-#TODO: Create system for Softmax to not update for Sarsa state2
 class Softmax(Agent):
     def __init__(self, env, alpha, gamma, episodes, tau) -> None:
         super().__init__(env, alpha, gamma, episodes)
