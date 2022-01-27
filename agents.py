@@ -29,7 +29,12 @@ class Agent:
         if reward == 1:
             self.total_success += 1
         self.index += 1
-        self.prob_of_success[self.index - 1] = self.total_success / self.index
+        self.prob_of_success[self.index - 1] += self.total_success / self.index
+
+    def reset(self):
+        self.Q = self.init_q_values()
+        self.index = 0
+        self.total_success = 0
 
 
 class GreedyAgent(Agent):
