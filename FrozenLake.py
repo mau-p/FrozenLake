@@ -46,17 +46,14 @@ for agent in agent_list:
     average_stats.append(agent.prob_of_success / TRIALS)
 
 
-result_array = average_stats[0]
-print(result_array[-1])
-
 plt.plot(average_stats[0], label="greedy Q")
 plt.plot(average_stats[1], label="egreedy Q")
 plt.plot(average_stats[2], label="greedy Sarsa")
 plt.plot(average_stats[3], label="egreedy Sarsa")
 plt.legend(loc='best')
 plt.xlabel("Iterations")
-plt.ylabel("Average reward per trial%")
-plt.title(f'Number of successful runs in {EPISODES} trainings')
+plt.ylabel("Probability of a succesful run")
+plt.title(f'Probability of a successful run throught training')
 plt.show()
 
 
