@@ -25,7 +25,7 @@ class Agent:
                     reward + self.gamma * np.argmax(self.Q[new_state, :]) - self.Q[state, action])
 
     def update_stats(self, reward):
-        self.obtained_rewards[self.index] = reward
+        self.obtained_rewards[self.index] += reward
         if reward == 1:
             self.total_success += 1
         self.index += 1
@@ -55,52 +55,3 @@ class eGreedyAgent(Agent):
             return np.random.randint(self.action_space)
         else:
             return np.random.choice(np.where(self.Q[state, :] == self.Q[state, :].max())[0])  # returns random argmax
-
-
-class OptimisticAgent(Agent):
-    def __init__(self, env, alpha, gamma, episodes) -> None:
-        super().__init__(env, alpha, gamma, episodes)
-        self.Q = np.ones((self.state_space, self.action_space))
-
-    def choose(self, state):
-        return np.argmax(np.where(self.Q[state, :] == self.Q[state, :].max())[0])  # returns random argmax
-
-
-class UCB(Agent):
-    def __init__(self, env,  alpha, gamma, episodes) -> None:
-        super().__init__(env, alpha, gamma, episodes)
-        self.c = 1 #TODO: Figure out how to initialize c
-        self.t = 1
-        self.action_count = [0] * self.action_space
-
-    def choose(self, state, update: bool):
-        max_combined = -10
-        for action in range(len(self.Q[state, :])):
-            action_counter = self.action_count[action] + 1
-            uncertainty = self.c * np.sqrt(np.log(self.t) / action_counter)
-            print(f'action counter {action_counter}')
-            print(f'uncertainty {uncertainty}')
-            if uncertainty + self.Q[state, action] > max_combined:
-                max_combined = uncertainty + self.Q[state, action]
-                max_combined_action = action
-        if update: # Don't update when fetching state2 for Sarsa
-            self.t += 1
-            self.action_count[max_combined_action] += 1
-        return max_combined_action
-
-class Softmax(Agent):
-    def __init__(self, env, alpha, gamma, episodes, tau) -> None:
-        super().__init__(env, alpha, gamma, episodes)
-        self.tau = tau
-        self.proba = [0] * self.action_space
-        self.action_select = list(range(self.action_space))
-
-    def choose(self, state, update: bool):
-        sum = 0
-        # Calculate sum of all estimates
-        for estimate in self.Q[state, :]:
-            sum += np.exp(estimate/self.tau)
-        # Apply softmax formula
-        for i in range(len(self.Q[state, :])):
-            self.proba[i] = np.exp(self.Q[state, i]/self.tau)/sum
-        return np.random.choice(self.action_select, p=self.proba)
